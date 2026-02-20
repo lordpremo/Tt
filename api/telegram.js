@@ -1,8 +1,18 @@
-// api/telegram.js
+// ===============================
+// BROKEN LORD • TELEGRAM BOT ENGINE (VERCEL)
+// ===============================
+
+// Ruhusu Vercel asome JSON body
+export const config = {
+  api: {
+    bodyParser: true
+  }
+};
 
 const TELEGRAM_API = (token) => `https://api.telegram.org/bot${token}`;
-const NEXRAY_BASE = "https://api.nexray.web.id";
+const NEXRAY = "https://api.nexray.web.id";
 
+// MAIN HANDLER
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(200).json({ ok: true, message: "BROKEN LORD Telegram webhook" });
@@ -10,8 +20,7 @@ export default async function handler(req, res) {
 
   const BOT_TOKEN = process.env.BOT_TOKEN;
   if (!BOT_TOKEN) {
-    console.error("BOT_TOKEN missing in env");
-    return res.status(500).json({ ok: false, error: "BOT_TOKEN not set" });
+    return res.status(500).json({ ok: false, error: "BOT_TOKEN missing" });
   }
 
   const update = req.body;
@@ -23,42 +32,45 @@ export default async function handler(req, res) {
       await handleCallback(BOT_TOKEN, update.callback_query);
     }
   } catch (err) {
-    console.error("Error handling update:", err);
+    console.error("BOT ERROR:", err);
   }
 
   return res.status(200).json({ ok: true });
 }
 
-async function handleMessage(token, message) {
-  const chatId = message.chat.id;
-  const text = (message.text || "").trim();
+// ===============================
+// MESSAGE HANDLER
+// ===============================
+
+async function handleMessage(token, msg) {
+  const chatId = msg.chat.id;
+  const text = (msg.text || "").trim();
 
   if (!text) {
-    return sendMessage(token, chatId, "Nipe command, kaka 😄");
+    return send(token, chatId, "Nipe command kaka 😄");
   }
 
+  // /start → brand + commands
   if (text === "/start") {
-    return sendMessage(
+    return send(
       token,
       chatId,
-      [
-        "🔥 <b>BROKEN LORD BOT</b> 🔥",
-        "",
-        "Karibu kwenye mfumo wa BROKEN LORD ⚡",
-        "Hapa unaweza kutumia API za Nexray moja kwa moja:",
-        "",
-        "<b>COMMANDS:</b>",
-        "/yt Zuchu - YouTube Play",
-        "/ai Hi - TurboChat",
-        "/suno love - Suno Music",
-        "/logo Spider - Solo Logo",
-        "/math 2+2 - MathGPT",
-        "/img2prompt <url> - Image → Prompt",
-        "/creart Beautiful - Create Art",
-        "/vcc - Virtual Card Generator",
-        "",
-        "<b>Powered by:</b> BROKEN LORD ENGINE ⚡"
-      ].join("\n")
+`🔥 <b>BROKEN LORD BOT</b> 🔥
+
+Karibu kwenye mfumo wa BROKEN LORD ⚡
+Hapa unaweza kutumia API za Nexray moja kwa moja.
+
+<b>COMMANDS:</b>
+/yt Zuchu - YouTube Play
+/ai Hi - TurboChat
+/suno love - Suno Music
+/logo Spider - Solo Logo
+/math 2+2 - MathGPT
+/img2prompt <url> - Image → Prompt
+/creart Beautiful - Create Art
+/vcc - Virtual Card Generator
+
+<b>Powered by:</b> BROKEN LORD ENGINE ⚡`
     );
   }
 
@@ -67,190 +79,177 @@ async function handleMessage(token, message) {
 
   switch (cmd.toLowerCase()) {
     case "/yt":
-      if (!arg) return sendMessage(token, chatId, "Andika: /yt Zuchu");
-      return ytPlay(token, chatId, arg);
-
+      return yt(token, chatId, arg);
     case "/ai":
-      if (!arg) return sendMessage(token, chatId, "Andika: /ai Hi");
-      return turboChat(token, chatId, arg);
-
+      return ai(token, chatId, arg);
     case "/suno":
-      if (!arg) return sendMessage(token, chatId, "Andika: /suno love");
-      return sunoMusic(token, chatId, arg);
-
+      return suno(token, chatId, arg);
     case "/logo":
-      if (!arg) return sendMessage(token, chatId, "Andika: /logo Spider");
-      return soloLogo(token, chatId, arg);
-
+      return logo(token, chatId, arg);
     case "/math":
-      if (!arg) return sendMessage(token, chatId, "Andika: /math 2+2");
-      return mathGPT(token, chatId, arg);
-
+      return math(token, chatId, arg);
     case "/img2prompt":
-      if (!arg) return sendMessage(token, chatId, "Andika: /img2prompt <image_url>");
-      return image2prompt(token, chatId, arg);
-
+      return img2prompt(token, chatId, arg);
     case "/creart":
-      if (!arg) return sendMessage(token, chatId, "Andika: /creart Beautiful");
       return creart(token, chatId, arg);
-
     case "/vcc":
-      return askVccType(token, chatId);
-
+      return askVcc(token, chatId);
     default:
-      return sendMessage(token, chatId, "Sijaelewa hii command, tumia /start kuona list.");
+      return send(token, chatId, "Sijaelewa hii command, tumia /start kuona list.");
   }
 }
 
-async function handleCallback(token, callback) {
-  const chatId = callback.message.chat.id;
-  const data = callback.data;
+// ===============================
+// CALLBACK HANDLER (VCC BUTTONS)
+// ===============================
+
+async function handleCallback(token, cb) {
+  const chatId = cb.message.chat.id;
+  const data = cb.data || "";
 
   if (data.startsWith("vcc:")) {
     const type = data.split(":")[1];
-    await sendMessage(token, chatId, `⏳ Natoa VCC ya aina: ${type.toUpperCase()}...`);
+    await send(token, chatId, `⏳ Natoa VCC ya ${type.toUpperCase()}...`);
     return vcc(token, chatId, type);
   }
 }
 
+// ===============================
 // TELEGRAM HELPERS
+// ===============================
 
-async function sendMessage(token, chatId, text, extra = {}) {
-  const url = `${TELEGRAM_API(token)}/sendMessage`;
-  const body = {
-    chat_id: chatId,
-    text,
-    parse_mode: "HTML",
-    ...extra
-  };
-
+async function send(token, chatId, text, extra = {}) {
   try {
-    await fetch(url, {
+    await fetch(`${TELEGRAM_API(token)}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        parse_mode: "HTML",
+        ...extra
+      })
     });
-  } catch (err) {
-    console.error("sendMessage error:", err);
+  } catch (e) {
+    console.error("send error:", e);
   }
 }
 
-async function sendInlineKeyboard(token, chatId, text, keyboard) {
-  return sendMessage(token, chatId, text, {
-    reply_markup: {
-      inline_keyboard: keyboard
-    }
+async function sendKeyboard(token, chatId, text, keyboard) {
+  return send(token, chatId, text, {
+    reply_markup: { inline_keyboard: keyboard }
   });
 }
 
-// NEXRAY HELPERS
+// ===============================
+// NEXRAY HELPER
+// ===============================
 
-async function safeGet(url) {
+async function get(url) {
   try {
-    const res = await fetch(url);
-    if (!res.ok) {
-      console.error("Nexray error:", res.status, url);
-      return null;
-    }
-    return await res.json();
-  } catch (err) {
-    console.error("safeGet error:", err);
+    const r = await fetch(url);
+    return await r.json();
+  } catch (e) {
+    console.error("Nexray error:", e);
     return null;
   }
 }
 
-async function ytPlay(token, chatId, query) {
-  const url = `${NEXRAY_BASE}/downloader/ytplay?q=${encodeURIComponent(query)}`;
-  const data = await safeGet(url);
-  if (!data) return sendMessage(token, chatId, "❌ YTPlay error.");
+// ===============================
+// COMMAND IMPLEMENTATIONS
+// ===============================
 
-  const title = data.title || "Result";
-  const dl = data.url || data.download_url || "";
-  let msg = `🎵 <b>YouTube Play</b>\n\n<b>Title:</b> ${title}`;
-  if (dl) msg += `\n<b>Download:</b> ${dl}`;
-  return sendMessage(token, chatId, msg);
+async function yt(token, chatId, q) {
+  if (!q) return send(token, chatId, "Andika: /yt Zuchu");
+  const data = await get(`${NEXRAY}/downloader/ytplay?q=${encodeURIComponent(q)}`);
+  if (!data) return send(token, chatId, "❌ YT error.");
+  return send(
+    token,
+    chatId,
+    `🎵 <b>YouTube</b>\n\n<b>Title:</b> ${data.title || "-"}\n<b>Link:</b> ${data.url || data.download_url || "-"}`
+  );
 }
 
-async function turboChat(token, chatId, text) {
-  const url = `${NEXRAY_BASE}/ai/turbochat?text=${encodeURIComponent(text)}`;
-  const data = await safeGet(url);
-  if (!data) return sendMessage(token, chatId, "❌ Turbochat error.");
-
-  const reply = data.result || data.response || JSON.stringify(data, null, 2);
-  return sendMessage(token, chatId, `🤖 <b>Turbochat</b>\n\n${reply}`);
+async function ai(token, chatId, q) {
+  if (!q) return send(token, chatId, "Andika: /ai Hi");
+  const data = await get(`${NEXRAY}/ai/turbochat?text=${encodeURIComponent(q)}`);
+  if (!data) return send(token, chatId, "❌ TurboChat error.");
+  return send(token, chatId, `🤖 <b>TurboChat</b>\n\n${data.result || data.response || JSON.stringify(data, null, 2)}`);
 }
 
-async function sunoMusic(token, chatId, prompt) {
-  const url = `${NEXRAY_BASE}/ai/suno?prompt=${encodeURIComponent(prompt)}`;
-  const data = await safeGet(url);
-  if (!data) return sendMessage(token, chatId, "❌ Suno error.");
-
-  const link = data.url || data.audio || "";
-  let msg = `🎶 <b>Suno Music</b>\n\n<b>Prompt:</b> ${prompt}`;
-  if (link) msg += `\n<b>Audio:</b> ${link}`;
-  return sendMessage(token, chatId, msg);
+async function suno(token, chatId, q) {
+  if (!q) return send(token, chatId, "Andika: /suno love");
+  const data = await get(`${NEXRAY}/ai/suno?prompt=${encodeURIComponent(q)}`);
+  if (!data) return send(token, chatId, "❌ Suno error.");
+  return send(
+    token,
+    chatId,
+    `🎶 <b>Suno</b>\n\n<b>Prompt:</b> ${q}\n<b>Audio:</b> ${data.url || data.audio || "-"}`
+  );
 }
 
-async function soloLogo(token, chatId, prompt) {
-  const url = `${NEXRAY_BASE}/ai/sologo?prompt=${encodeURIComponent(prompt)}`;
-  const data = await safeGet(url);
-  if (!data) return sendMessage(token, chatId, "❌ Logo error.");
-
-  const img = data.url || data.image || "";
-  let msg = `🎨 <b>Solo Logo</b>\n\n<b>Prompt:</b> ${prompt}`;
-  if (img) msg += `\n<b>Image:</b> ${img}`;
-  return sendMessage(token, chatId, msg);
+async function logo(token, chatId, q) {
+  if (!q) return send(token, chatId, "Andika: /logo Spider");
+  const data = await get(`${NEXRAY}/ai/sologo?prompt=${encodeURIComponent(q)}`);
+  if (!data) return send(token, chatId, "❌ Logo error.");
+  return send(
+    token,
+    chatId,
+    `🎨 <b>Solo Logo</b>\n\n<b>Prompt:</b> ${q}\n<b>Image:</b> ${data.url || data.image || "-"}`
+  );
 }
 
-async function mathGPT(token, chatId, text) {
-  const url = `${NEXRAY_BASE}/ai/mathgpt?text=${encodeURIComponent(text)}`;
-  const data = await safeGet(url);
-  if (!data) return sendMessage(token, chatId, "❌ MathGPT error.");
-
-  const ans = data.result || data.answer || JSON.stringify(data, null, 2);
-  return sendMessage(token, chatId, `📐 <b>MathGPT</b>\n\n${ans}`);
+async function math(token, chatId, q) {
+  if (!q) return send(token, chatId, "Andika: /math 2+2");
+  const data = await get(`${NEXRAY}/ai/mathgpt?text=${encodeURIComponent(q)}`);
+  if (!data) return send(token, chatId, "❌ MathGPT error.");
+  return send(
+    token,
+    chatId,
+    `📐 <b>MathGPT</b>\n\n${data.result || data.answer || JSON.stringify(data, null, 2)}`
+  );
 }
 
-async function image2prompt(token, chatId, imageUrl) {
-  const url = `${NEXRAY_BASE}/ai/image2prompt?url=${encodeURIComponent(imageUrl)}`;
-  const data = await safeGet(url);
-  if (!data) return sendMessage(token, chatId, "❌ image2prompt error.");
-
-  const prompt = data.result || data.prompt || JSON.stringify(data, null, 2);
-  return sendMessage(token, chatId, `🖼 <b>Image → Prompt</b>\n\n${prompt}`);
+async function img2prompt(token, chatId, q) {
+  if (!q) return send(token, chatId, "Andika: /img2prompt <url>");
+  const data = await get(`${NEXRAY}/ai/image2prompt?url=${encodeURIComponent(q)}`);
+  if (!data) return send(token, chatId, "❌ image2prompt error.");
+  return send(
+    token,
+    chatId,
+    `🖼 <b>Image → Prompt</b>\n\n${data.result || data.prompt || JSON.stringify(data, null, 2)}`
+  );
 }
 
-async function creart(token, chatId, prompt) {
-  const url = `${NEXRAY_BASE}/ai/creart?prompt=${encodeURIComponent(prompt)}`;
-  const data = await safeGet(url);
-  if (!data) return sendMessage(token, chatId, "❌ Creart error.");
-
-  const img = data.url || data.image || "";
-  let msg = `🎨 <b>Creart</b>\n\n<b>Prompt:</b> ${prompt}`;
-  if (img) msg += `\n<b>Image:</b> ${img}`;
-  return sendMessage(token, chatId, msg);
+async function creart(token, chatId, q) {
+  if (!q) return send(token, chatId, "Andika: /creart Beautiful");
+  const data = await get(`${NEXRAY}/ai/creart?prompt=${encodeURIComponent(q)}`);
+  if (!data) return send(token, chatId, "❌ CreArt error.");
+  return send(
+    token,
+    chatId,
+    `🎨 <b>CreArt</b>\n\n<b>Prompt:</b> ${q}\n<b>Image:</b> ${data.url || data.image || "-"}`
+  );
 }
 
-async function vcc(token, chatId, type) {
-  const url = `${NEXRAY_BASE}/tools/vcc?type=${encodeURIComponent(type)}`;
-  const data = await safeGet(url);
-  if (!data) return sendMessage(token, chatId, "❌ VCC error.");
-
-  const info = JSON.stringify(data, null, 2);
-  return sendMessage(token, chatId, `💳 <b>VCC (${type.toUpperCase()})</b>\n\n<code>${info}</code>`);
-}
-
-async function askVccType(token, chatId) {
-  const keyboard = [
+async function askVcc(token, chatId) {
+  return sendKeyboard(token, chatId, "Chagua aina ya VCC:", [
     [
       { text: "Visa", callback_data: "vcc:visa" },
       { text: "Mastercard", callback_data: "vcc:mastercard" }
     ],
     [
-      { text: "American Express", callback_data: "vcc:amex" },
+      { text: "Amex", callback_data: "vcc:amex" },
       { text: "JCB", callback_data: "vcc:jcb" }
     ]
-  ];
+  ]);
+}
 
-  return sendInlineKeyboard(token, chatId, "Chagua aina ya kadi:", keyboard);
+async function vcc(token, chatId, type) {
+  const data = await get(`${NEXRAY}/tools/vcc?type=${encodeURIComponent(type)}`);
+  return send(
+    token,
+    chatId,
+    `💳 <b>VCC (${type.toUpperCase()})</b>\n\n<code>${JSON.stringify(data || {}, null, 2)}</code>`
+  );
 }
