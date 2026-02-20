@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BROKEN LORD • Nexray Bot Status</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:radial-gradient(circle at top,#5b3cff 0,#050014 55%,#000 100%);
+      color:#f5f5ff;
+      padding:20px;
+    }
+    .card{
+      background:rgba(5,0,20,.94);
+      border-radius:18px;
+      border:1px solid rgba(140,120,255,.5);
+      box-shadow:0 0 40px rgba(120,90,255,.5),0 0 120px rgba(0,0,0,.9);
+      padding:20px 22px;
+      max-width:420px;
+      width:100%;
+      text-align:center;
+    }
+    .logo{
+      width:40px;height:40px;border-radius:14px;
+      margin:0 auto 10px;
+      background:radial-gradient(circle at 30% 0,#fff 0,#8f7bff 35%,#2b1450 70%,#050014 100%);
+      box-shadow:0 0 22px rgba(160,140,255,.9);
+    }
+    h1{font-size:18px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:4px}
+    h2{font-size:13px;opacity:.75;margin-bottom:16px}
+    .status{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 12px;
+      border-radius:999px;
+      background:rgba(10,255,120,.08);
+      border:1px solid rgba(10,255,120,.6);
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      margin-bottom:10px;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background:#0f8;
+      box-shadow:0 0 10px #0f8;
+    }
+    p{font-size:12px;opacity:.8;margin-bottom:4px}
+    code{
+      font-size:11px;
+      background:rgba(255,255,255,.04);
+      padding:2px 6px;
+      border-radius:6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo"></div>
+    <h1>BROKEN LORD</h1>
+    <h2>Nexray Telegram Bot • Online Status</h2>
+
+    <div class="status">
+      <span class="dot"></span>
+      <span>Bot Online</span>
+    </div>
+
+    <p>Webhook: <code>/api/telegram</code></p>
+    <p>Status JSON: <code>/api/status</code></p>
+    <p style="margin-top:10px;opacity:.6;font-size:11px;">
+      Bot inafanya kazi 24/7 kupitia Vercel serverless functions, bila mtu kufungua website.
+    </p>
+  </div>
+</body>
+</html>
