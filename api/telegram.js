@@ -223,4 +223,34 @@ async function image2prompt(token, chatId, imageUrl) {
 async function creart(token, chatId, prompt) {
   const url = `${NEXRAY_BASE}/ai/creart?prompt=${encodeURIComponent(prompt)}`;
   const data = await safeGet(url);
-  if (!data) return sendMessage
+  if (!data) return sendMessage(token, chatId, "❌ Creart error.");
+
+  const img = data.url || data.image || "";
+  let msg = `🎨 <b>Creart</b>\n\n<b>Prompt:</b> ${prompt}`;
+  if (img) msg += `\n<b>Image:</b> ${img}`;
+  return sendMessage(token, chatId, msg);
+}
+
+async function vcc(token, chatId, type) {
+  const url = `${NEXRAY_BASE}/tools/vcc?type=${encodeURIComponent(type)}`;
+  const data = await safeGet(url);
+  if (!data) return sendMessage(token, chatId, "❌ VCC error.");
+
+  const info = JSON.stringify(data, null, 2);
+  return sendMessage(token, chatId, `💳 <b>VCC (${type.toUpperCase()})</b>\n\n<code>${info}</code>`);
+}
+
+async function askVccType(token, chatId) {
+  const keyboard = [
+    [
+      { text: "Visa", callback_data: "vcc:visa" },
+      { text: "Mastercard", callback_data: "vcc:mastercard" }
+    ],
+    [
+      { text: "American Express", callback_data: "vcc:amex" },
+      { text: "JCB", callback_data: "vcc:jcb" }
+    ]
+  ];
+
+  return sendInlineKeyboard(token, chatId, "Chagua aina ya kadi:", keyboard);
+}
