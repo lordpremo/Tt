@@ -42,26 +42,22 @@ async function handleMessage(token, message) {
       token,
       chatId,
       [
-        "BROKEN LORD • Nexray Engine ⚡",
+        "🔥 <b>BROKEN LORD BOT</b> 🔥",
         "",
-        "Commands:",
-        "/yt <query> - YouTube play",
-        "/ai <text> - Turbochat",
-        "/suno <prompt> - Suno music",
-        "/logo <prompt> - Solo logo",
-        "/math <text> - MathGPT",
-        "/img2prompt <url> - Image to prompt",
-        "/creart <prompt> - Create art",
-        "/vcc - Chagua aina ya kadi (Visa/Mastercard/Amex/JCB)",
+        "Karibu kwenye mfumo wa BROKEN LORD ⚡",
+        "Hapa unaweza kutumia API za Nexray moja kwa moja:",
         "",
-        "Mfano:",
-        "/yt Zuchu",
-        "/ai Hi",
-        "/suno love",
-        "/logo Spider",
-        "/math 2+2",
-        "/img2prompt https://files.catbox.moe/o90aki.jpg",
-        "/creart Beautiful"
+        "<b>COMMANDS:</b>",
+        "/yt Zuchu - YouTube Play",
+        "/ai Hi - TurboChat",
+        "/suno love - Suno Music",
+        "/logo Spider - Solo Logo",
+        "/math 2+2 - MathGPT",
+        "/img2prompt <url> - Image → Prompt",
+        "/creart Beautiful - Create Art",
+        "/vcc - Virtual Card Generator",
+        "",
+        "<b>Powered by:</b> BROKEN LORD ENGINE ⚡"
       ].join("\n")
     );
   }
@@ -117,7 +113,7 @@ async function handleCallback(token, callback) {
   }
 }
 
-// ========== TELEGRAM HELPERS ==========
+// TELEGRAM HELPERS
 
 async function sendMessage(token, chatId, text, extra = {}) {
   const url = `${TELEGRAM_API(token)}/sendMessage`;
@@ -147,7 +143,7 @@ async function sendInlineKeyboard(token, chatId, text, keyboard) {
   });
 }
 
-// ========== NEXRAY API WRAPPERS ==========
+// NEXRAY HELPERS
 
 async function safeGet(url) {
   try {
@@ -227,36 +223,4 @@ async function image2prompt(token, chatId, imageUrl) {
 async function creart(token, chatId, prompt) {
   const url = `${NEXRAY_BASE}/ai/creart?prompt=${encodeURIComponent(prompt)}`;
   const data = await safeGet(url);
-  if (!data) return sendMessage(token, chatId, "❌ Creart error.");
-
-  const img = data.url || data.image || "";
-  let msg = `🎨 <b>Creart</b>\n\n<b>Prompt:</b> ${prompt}`;
-  if (img) msg += `\n<b>Image:</b> ${img}`;
-  return sendMessage(token, chatId, msg);
-}
-
-async function vcc(token, chatId, type) {
-  const url = `${NEXRAY_BASE}/tools/vcc?type=${encodeURIComponent(type)}`;
-  const data = await safeGet(url);
-  if (!data) return sendMessage(token, chatId, "❌ VCC error.");
-
-  const info = JSON.stringify(data, null, 2);
-  return sendMessage(token, chatId, `💳 <b>VCC (${type.toUpperCase()})</b>\n\n<code>${info}</code>`);
-}
-
-// ========== VCC INLINE KEYBOARD ==========
-
-async function askVccType(token, chatId) {
-  const keyboard = [
-    [
-      { text: "Visa", callback_data: "vcc:visa" },
-      { text: "Mastercard", callback_data: "vcc:mastercard" }
-    ],
-    [
-      { text: "American Express", callback_data: "vcc:amex" },
-      { text: "JCB", callback_data: "vcc:jcb" }
-    ]
-  ];
-
-  return sendInlineKeyboard(token, chatId, "Chagua aina ya kadi:", keyboard);
-}
+  if (!data) return sendMessage
